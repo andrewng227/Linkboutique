@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#fcf0f5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Bảng Theo Dõi Giờ Làm Và Chấm Công Tự Động - Andrew Nguyen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Top Header Bar -->
+    <header class="main-header">
+      <div class="header-content">
+        <h1 class="main-title">BẢNG THEO DÕI GIỜ LÀM</h1>
+      </div>
+      <div class="header-actions">
+        <button id="btnAddRow" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Thêm Ngày Làm
+        </button>
+        <button id="btnRestore" class="btn btn-outline" title="Khôi phục lại dữ liệu trước đó">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          Khôi Phục
+        </button>
+        <button id="btnReset" class="btn btn-danger-outline" title="Đặt lại bảng chấm công">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+          Đặt Lại
+        </button>
+        <button id="btnPrint" class="btn btn-outline">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Xuất / In
+        </button>
+      </div>
+    </header>
+
+    <!-- Overview Panel (Split into Info Settings & Summary KPI Cards) -->
+    <section class="overview-section">
+      <!-- Left Config Card -->
+      <div class="config-card">
+        <div class="config-row">
+          <label for="employeeName" class="config-label">Bé iu:</label>
+          <div class="config-input-wrapper">
+            <input type="text" id="employeeName" value="Andrew Nguyen" class="config-input font-bold"
+              placeholder="Tên bé ">
+          </div>
+        </div>
+
+        <div class="config-row">
+          <label for="workPeriod" class="config-label">Kỳ làm việc:</label>
+          <div class="config-input-wrapper">
+            <input type="month" id="workPeriod" value="2026-09" class="config-input">
+          </div>
+        </div>
+
+        <div class="config-row">
+          <label for="baseRate" class="config-label">Lương theo giờ:</label>
+          <div class="config-input-wrapper suffix-wrap">
+            <input type="number" id="baseRate" value="30000" step="1000" class="config-input text-right">
+            <span class="suffix">đ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Stat Cards -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-card card-blue">
+          <div class="kpi-title">TỔNG GIỜ LÀM</div>
+          <div class="kpi-value" id="kpiTotalHours">0,0 h</div>
+          <div class="kpi-subtitle">Giờ làm thực tế</div>
+        </div>
+
+        <div class="kpi-card card-emerald">
+          <div class="kpi-title">TỔNG THU NHẬP</div>
+          <div class="kpi-value highlight-income" id="kpiTotalSalary">0 đ</div>
+          <div class="kpi-subtitle">Tạm tính (VNĐ)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timesheet Table Section -->
+    <main class="table-container shadow-elevation">
+      <div class="mobile-scroll-tip no-print">
+        <span>👉 Vuốt ngang bảng để xem tất cả các cột</span>
+      </div>
+      <div class="table-responsive">
+        <table class="timesheet-table" id="timesheetTable">
+          <thead>
+            <tr>
+              <th class="col-date">Ngày</th>
+              <th class="col-day">Thứ</th>
+              <th class="col-time">Giờ vào</th>
+              <th class="col-time">Giờ ra</th>
+              <th class="col-hours">Tổng giờ</th>
+              <th class="col-salary">Thành tiền</th>
+              <th class="col-action no-print">Xoá</th>
+            </tr>
+          </thead>
+          <tbody id="timesheetBody">
+            <!-- Dynamic rows will be inserted here -->
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="4" class="text-center font-bold uppercase">TỔNG CỘNG</td>
+              <td class="font-bold text-center" id="footerTotalHours">0,0 h</td>
+              <td class="font-bold text-center salary-cell" id="footerTotalSalary">0 đ</td>
+              <td class="no-print"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="table-bottom-bar no-print">
+        <button type="button" class="btn btn-primary" id="btnBottomAddRow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          + Thêm Ngày Làm
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- iOS Drum Roller Wheel Picker Modal for "Thứ" -->
+  <div class="wheel-picker-modal" id="wheelPickerModal">
+    <div class="wheel-picker-backdrop" id="wheelPickerBackdrop"></div>
+    <div class="wheel-picker-dialog">
+      <div class="wheel-picker-header">
+        <button type="button" class="wheel-picker-btn cancel-btn" id="btnCancelWheel">Hủy</button>
+        <span class="wheel-picker-title">Cuộn để chọn Thứ</span>
+        <button type="button" class="wheel-picker-btn confirm-btn" id="btnConfirmWheel">Xong</button>
+      </div>
+
+      <div class="wheel-viewport-container">
+        <!-- Lens / Focus highlight bar -->
+        <div class="wheel-highlight-lens"></div>
+        <div class="wheel-top-shadow"></div>
+        <div class="wheel-bottom-shadow"></div>
+
+        <!-- Scrollable drum wheel -->
+        <div class="wheel-scroll-track" id="wheelScrollTrack">
+          <!-- Items populated by JS: Thứ Hai -> Chủ nhật -->
+        </div>
+      </div>
+
+      <div class="wheel-picker-footer-tip">
+        Vuốt lên / xuống hoặc lăn chuột để chọn thứ trong tuần
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notification" id="toastNotification"></div>
+
+  <!-- Falling Sakura Petals Canvas -->
+  <canvas id="sakuraCanvas" class="sakura-canvas"></canvas>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
