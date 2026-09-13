@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#fcf0f5">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>I love u so much</title>
+  <title>Bảng Theo Dõi Giờ Làm Và Chấm Công Tự Động</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -17,13 +17,54 @@
 </head>
 
 <body>
-  <div class="app-container">
+  <!-- Security PIN / Password Lock Screen -->
+  <div class="lock-screen-overlay" id="lockScreenOverlay">
+    <div class="lock-card" id="lockCard">
+      <div class="lock-icon-wrap">
+        <span class="lock-emoji">🌸🔐</span>
+      </div>
+      <h2 class="lock-title">Bảng Chấm Công</h2>
+      <p class="lock-subtitle">Trang web được bảo vệ. Vui lòng nhập mã PIN hoặc mật khẩu để truy cập.</p>
+
+      <form id="lockForm" class="lock-form" onsubmit="return false;">
+        <div class="lock-input-group">
+          <input 
+            type="password" 
+            id="lockPinInput" 
+            class="lock-input" 
+            placeholder="Nhập mã PIN (Mặc định: 2026)" 
+            autocomplete="current-password"
+            maxlength="20"
+          >
+          <button type="button" class="btn-toggle-eye" id="btnTogglePassword" title="Hiện/Ẩn mật khẩu">
+            👁️
+          </button>
+        </div>
+        <div class="lock-error-msg" id="lockErrorMsg"></div>
+        <button type="submit" class="btn btn-primary btn-unlock" id="btnUnlock">
+          🔓 Mở Khóa Truy Cập
+        </button>
+      </form>
+      <div class="lock-footer-hint">
+        💡 Bạn có thể gửi link đã gắn sẵn mã để người nhận mở thẳng
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container" id="mainAppContainer">
     <!-- Top Header Bar -->
     <header class="main-header">
       <div class="header-content">
         <h1 class="main-title">BẢNG THEO DÕI GIỜ LÀM</h1>
       </div>
       <div class="header-actions">
+        <button id="btnShareLink" class="btn btn-secondary" title="Sao chép link tự mở khóa để gửi cho người khác">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          Chia Sẻ Link
+        </button>
         <button id="btnAddRow" class="btn btn-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"></line>

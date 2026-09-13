@@ -849,6 +849,167 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   SECURITY PIN / PASSWORD LOCK SCREEN
+   -------------------------------------------------------------------------- */
+.lock-screen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(254, 244, 247, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s ease;
+}
+
+.lock-screen-overlay.unlocked {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.lock-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--white);
+  border: 1.5px solid var(--primary-200);
+  border-radius: var(--radius-xl);
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(223, 126, 152, 0.2), 0 4px 12px rgba(45, 24, 32, 0.08);
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lock-screen-overlay.unlocked .lock-card {
+  transform: scale(0.92) translateY(-20px);
+}
+
+.lock-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  background: var(--primary-100);
+  border: 2px solid var(--primary-200);
+  border-radius: 50%;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(223, 126, 152, 0.2);
+}
+
+.lock-emoji {
+  font-size: 2rem;
+}
+
+.lock-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary-900);
+  margin-bottom: 6px;
+}
+
+.lock-subtitle {
+  font-size: 0.85rem;
+  color: var(--slate-500);
+  line-height: 1.45;
+  margin-bottom: 20px;
+}
+
+.lock-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lock-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lock-input {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.15em;
+  padding: 12px 42px 12px 16px;
+  min-height: 48px;
+  background: #fff8fa;
+  border: 2px solid var(--primary-200);
+  border-radius: 999px;
+  color: var(--slate-900);
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.lock-input:focus {
+  background: var(--white);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 4px rgba(223, 126, 152, 0.22);
+}
+
+.btn-toggle-eye {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.btn-toggle-eye:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.lock-error-msg {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #bf4565;
+  min-height: 18px;
+  transition: all 0.2s ease;
+}
+
+.btn-unlock {
+  width: 100%;
+  padding: 12px;
+  font-size: 0.95rem;
+  min-height: 46px;
+}
+
+.lock-footer-hint {
+  font-size: 0.78rem;
+  color: var(--slate-400);
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--primary-100);
+}
+
+/* Shake animation on wrong PIN */
+.shake-animation {
+  animation: lockShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes lockShake {
+  10%, 90% { transform: translate3d(-3px, 0, 0); }
+  20%, 80% { transform: translate3d(5px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+  40%, 60% { transform: translate3d(6px, 0, 0); }
+}
+
+/* --------------------------------------------------------------------------
    TOAST NOTIFICATION
    -------------------------------------------------------------------------- */
 .toast-notification {

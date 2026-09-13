@@ -542,15 +542,18 @@ class TimesheetApp {
     });
 
     // Date change
+    // Date change (Supports both input & change for iOS/Android picker)
     this.tableBody.querySelectorAll('.date-input').forEach(input => {
-      input.addEventListener('change', (e) => {
+      const onDateUpdate = () => {
         const index = parseInt(input.dataset.index, 10);
+        if (isNaN(index) || !this.records[index]) return;
         this.records[index].date = input.value;
-        // Optionally update day of week automatically when date changes
         this.records[index].day = this.getDayOfWeekFromDate(input.value);
         this.render();
         this.saveState();
-      });
+      };
+      input.addEventListener('change', onDateUpdate);
+      input.addEventListener('input', onDateUpdate);
     });
 
     // Setup 24h Time Inputs (In Time & Out Time)
@@ -967,8 +970,148 @@ class SakuraPetals {
   }
 }
 
+/* --------------------------------------------------------------------------
+   SECURITY PIN / PASSWORD LOCK MANAGER
+   -------------------------------------------------------------------------- */
+class SecurityLockManager {
+  constructor() {
+    this.DEFAULT_PIN = '2026';
+    this.overlay = document.getElementById('lockScreenOverlay');
+    this.card = document.getElementById('lockCard');
+    this.form = document.getElementById('lockForm');
+    this.pinInput = document.getElementById('lockPinInput');
+    this.btnUnlock = document.getElementById('btnUnlock');
+    this.btnToggleEye = document.getElementById('btnTogglePassword');
+    this.errorMsg = document.getElementById('lockErrorMsg');
+    this.btnShareLink = document.getElementById('btnShareLink');
+
+    this.isUnlocked = false;
+
+    this.init();
+  }
+
+  init() {
+    if (!this.overlay) return;
+
+    // Check if auto-unlock via URL param or Hash
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+    const urlKey = urlParams.get('pass') || urlParams.get('pin') || urlParams.get('key') ||
+                   hashParams.get('pass') || hashParams.get('pin') || hashParams.get('key');
+
+    const sessionUnlocked = sessionStorage.getItem('timesheet_unlocked') === 'true';
+
+    if (sessionUnlocked || (urlKey && urlKey.trim() === this.DEFAULT_PIN)) {
+      this.unlock(false);
+      return;
+    }
+
+    // Event listeners
+    if (this.form) {
+      this.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.verifyAndUnlock();
+      });
+    }
+
+    if (this.btnUnlock) {
+      this.btnUnlock.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.verifyAndUnlock();
+      });
+    }
+
+    if (this.btnToggleEye && this.pinInput) {
+      this.btnToggleEye.addEventListener('click', () => {
+        const isPass = this.pinInput.type === 'password';
+        this.pinInput.type = isPass ? 'text' : 'password';
+        this.btnToggleEye.textContent = isPass ? '🙈' : '👁️';
+      });
+    }
+
+    // Share link button handler
+    if (this.btnShareLink) {
+      this.btnShareLink.addEventListener('click', () => {
+        this.copyShareLink();
+      });
+    }
+
+    // Focus input
+    setTimeout(() => {
+      if (this.pinInput && !this.isUnlocked) {
+        this.pinInput.focus();
+      }
+    }, 400);
+  }
+
+  verifyAndUnlock() {
+    const entered = this.pinInput ? this.pinInput.value.trim() : '';
+
+    if (entered === this.DEFAULT_PIN) {
+      this.unlock(true);
+    } else {
+      this.showError('❌ Mã PIN chưa đúng, vui lòng thử lại!');
+    }
+  }
+
+  unlock(showWelcomeToast = true) {
+    this.isUnlocked = true;
+    sessionStorage.setItem('timesheet_unlocked', 'true');
+
+    if (this.overlay) {
+      this.overlay.classList.add('unlocked');
+      setTimeout(() => {
+        this.overlay.style.display = 'none';
+      }, 450);
+    }
+
+    if (showWelcomeToast && window.timesheetApp && window.timesheetApp.showToast) {
+      window.timesheetApp.showToast('🌸 Mở khóa thành công! Chào anh yêu.');
+    }
+  }
+
+  showError(msg) {
+    if (this.errorMsg) {
+      this.errorMsg.textContent = msg;
+    }
+    if (this.card) {
+      this.card.classList.remove('shake-animation');
+      void this.card.offsetWidth; // trigger reflow
+      this.card.classList.add('shake-animation');
+    }
+    if (this.pinInput) {
+      this.pinInput.value = '';
+      this.pinInput.focus();
+    }
+  }
+
+  copyShareLink() {
+    // Generate clean auto-unlock URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('pass', this.DEFAULT_PIN);
+    const shareableUrl = url.toString();
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareableUrl).then(() => {
+        if (window.timesheetApp && window.timesheetApp.showToast) {
+          window.timesheetApp.showToast('🔗 Đã sao chép link tự mở khóa (PIN: 2026)!');
+        }
+      }).catch(() => {
+        this.fallbackCopy(shareableUrl);
+      });
+    } else {
+      this.fallbackCopy(shareableUrl);
+    }
+  }
+
+  fallbackCopy(text) {
+    prompt('Copy đường link tự mở khóa này để gửi nha anh:', text);
+  }
+}
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   window.timesheetApp = new TimesheetApp();
   window.sakuraEffect = new SakuraPetals('sakuraCanvas');
+  window.securityLock = new SecurityLockManager();
 });
